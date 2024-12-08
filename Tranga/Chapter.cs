@@ -20,7 +20,7 @@ public readonly struct Chapter : IComparable
     // ReSharper disable once MemberCanBePrivate.Global
     public string fileName { get; }
     public string? id { get; }
-    
+
     private static readonly Regex LegalCharacters = new (@"([A-z]*[0-9]* *\.*-*,*\]*\[*'*\'*\)*\(*~*!*)*");
     private static readonly Regex IllegalStrings = new(@"(Vol(ume)?|Ch(apter)?)\.?", RegexOptions.IgnoreCase);
 
@@ -29,7 +29,7 @@ public readonly struct Chapter : IComparable
             float.Parse(chapterNumber, GlobalBase.numberFormatDecimalPoint), url, id)
     {
     }
-    
+
     public Chapter(Manga parentManga, string? name, float? volumeNumber, float chapterNumber, string url, string? id = null)
     {
         this.parentManga = parentManga;
@@ -38,7 +38,7 @@ public readonly struct Chapter : IComparable
         this.chapterNumber = chapterNumber;
         this.url = url;
         this.id = id;
-        
+
         string chapterVolNumStr = $"Vol.{this.volumeNumber} Ch.{chapterNumber}";
 
         if (name is not null && name.Length > 0)
@@ -92,7 +92,7 @@ public readonly struct Chapter : IComparable
             else
                 File.Delete(markerPath);
         }
-        
+
         if(mangaArchive is null)
         {
             FileInfo[] archives = new DirectoryInfo(mangaDirectory).GetFiles("*.cbz");
@@ -112,13 +112,13 @@ public readonly struct Chapter : IComparable
                        ((!m.Groups[3].Success && string.IsNullOrEmpty(t.name)) || m.Groups[3].Value == t.name);
             });
         }
-        
+
         string correctPath = GetArchiveFilePath();
         if(mangaArchive is not null && mangaArchive.FullName != correctPath)
             mangaArchive.MoveTo(correctPath, true);
         return (mangaArchive is not null);
     }
-    
+
     public void CreateChapterMarker()
     {
         if (this.id is null)
@@ -126,10 +126,10 @@ public readonly struct Chapter : IComparable
         string path = Path.Join(TrangaSettings.downloadLocation, parentManga.folderName, $".{id}");
         File.WriteAllText(path, GetArchiveFilePath());
         File.SetAttributes(path, FileAttributes.Hidden);
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))  
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             File.SetUnixFileMode(path, UserRead | UserWrite | UserExecute | GroupRead | GroupWrite | GroupExecute | OtherRead | OtherExecute);
     }
-    
+
     /// <summary>
     /// Creates full file path of chapter-archive
     /// </summary>
@@ -144,9 +144,48 @@ public readonly struct Chapter : IComparable
     /// See ComicInfo.xml
     /// </summary>
     /// <returns>XML-string</returns>
-    internal string GetComicInfoXmlString()
-    {
-        XElement comicInfo = new XElement("ComicInfo",
+    internal XElement GetComicInfoPages(ChapterImages chapterImages) {
+        XElement pages = new XElement("Pages");
+
+        int index = 0;
+
+        if (chapterImages.Cover is not null) {
+            pages.Add(
+                new XElement(
+                    "Page",
+                    new XAttribute("Image", index++.ToString()),
+                    new XAttribute("Type", "FrontCover")
+                )
+            );
+        }
+
+        if (chapterImages.Thumbnail is not null) {
+            pages.Add(
+                new XElement(
+                    "Page",
+                    new XAttribute("Image", index++.ToString()),
+                    new XAttribute("Type", "Thumbnail")
+                )
+            );
+        }
+
+        if (chapterImages.StoryPages is not null) {
+            foreach (string image in chapterImages.StoryPages) {
+                pages.Add(
+                    new XElement(
+                        "Page",
+                        new XAttribute("Image", index++.ToString()),
+                        new XAttribute("Type", "Story")
+                    )
+                );
+            }
+        }
+
+        return pages;
+    }
+    internal XElement GetComicInfoXml(ChapterImages? chapterImages = null) {
+        XElement comicInfo = new XElement(
+            "ComicInfo",
             new XElement("Tags", string.Join(',', parentManga.tags)),
             new XElement("LanguageISO", parentManga.originalLanguage),
             new XElement("Title", this.name),
@@ -154,6 +193,43 @@ public readonly struct Chapter : IComparable
             new XElement("Volume", this.volumeNumber),
             new XElement("Number", this.chapterNumber)
         );
+
+        if (chapterImages is not null) {
+            comicInfo.Add(GetComicInfoPages(chapterImages));
+        }
+
+        return comicInfo;
+    }
+
+    internal string GetComicInfoXmlString(ChapterImages? chapterImages = null)
+    {
+        XElement comicInfo = GetComicInfoXml(chapterImages);
         return comicInfo.ToString();
+    }
+
+    public class ChapterImages
+    {
+        public string? Cover { get; set; }
+        public string? Thumbnail { get; set; }
+        public string[]? StoryPages { get; set; }
+
+        public ChapterImages(string? cover, string? thumbnail, string[] storyPages)
+        {
+            Cover = cover;
+            Thumbnail = thumbnail;
+            StoryPages = storyPages;
+        }
+
+        public ChapterImages(string[] storyPages)
+        {
+            StoryPages = storyPages;
+        }
+
+        public ChapterImages() {}
+
+        public int Count()
+        {
+            return (Cover is not null ? 1 : 0) + (Thumbnail is not null ? 1 : 0) + (StoryPages is not null ? StoryPages.Length : 0);
+        }
     }
 }
