@@ -1,3 +1,35 @@
+## Development Environment (devenv + Nix)
+
+This project uses [devenv](https://devenv.sh/) and Nix for reproducible development environments.
+
+### Getting Started
+
+1. Install [Nix](https://nixos.org/download.html) and [devenv](https://devenv.sh/).
+2. Enter the development shell:
+
+  ```sh
+  devenv shell
+  ```
+
+3. Restore project dependancies
+
+  ```sh
+  restore
+  ```
+
+4. Build, run, or clean the project:
+
+  ```sh
+  build
+  run
+  clean
+  ```
+
+### Notes
+
+- The environment includes .NET SDK 8 and git.
+- devenv scripts are defined in `devenv.nix`.
+
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
@@ -5,10 +37,10 @@
 <h3 align="center">Tranga</h3>
 
   <p align="center">
-    Automatic Manga and Metadata downloader 
+    Automatic Manga and Metadata downloader
   </p>
   <p align="center">
-    This is the API for <a href="https://github.com/C9Glax/tranga-website">Tranga-Website</a>  
+    This is the API for <a href="https://github.com/C9Glax/tranga-website">Tranga-Website</a>
   </p>
 </div>
 
@@ -41,7 +73,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Tranga can download Chapters and Metadata from "Scanlation" sites such as 
+Tranga can download Chapters and Metadata from "Scanlation" sites such as
 
 - [MangaDex.org](https://mangadex.org/) (Multilingual)
 - [Manganato.com](https://manganato.com/) (en)
@@ -54,7 +86,7 @@ Tranga can download Chapters and Metadata from "Scanlation" sites such as
 - [Webtoons](https://www.webtoons.com/en/)
 - ❓ Open an [issue](https://github.com/C9Glax/tranga/issues/new?assignees=&labels=New+Connector&projects=&template=new_connector.yml&title=%5BNew+Connector%5D%3A+)
 
-and trigger a library-scan with [Komga](https://komga.org/) and [Kavita](https://www.kavitareader.com/).  
+and trigger a library-scan with [Komga](https://komga.org/) and [Kavita](https://www.kavitareader.com/).
 Notifications can be sent to your devices using [Gotify](https://gotify.net/), [LunaSea](https://www.lunasea.app/) or [Ntfy](https://ntfy.sh/
 ).
 
@@ -64,11 +96,11 @@ Tranga (this git-repo) will open a port (standard 6531) and listen for requests 
 The configuration is all done through HTTP-Requests.
 _**For a web-frontend use [tranga-website](https://github.com/C9Glax/tranga-website).**_
 
-This project downloads the images for a Manga from the specified Scanlation-Website and packages them with some metadata - from that same website - in a .cbz-archive (per chapter).  
-It does this on an interval, and checks for any Chapters (.cbz-Archive) not already existing in your specified Download-Location. (If you rename or move files, it will download those again)  
+This project downloads the images for a Manga from the specified Scanlation-Website and packages them with some metadata - from that same website - in a .cbz-archive (per chapter).
+It does this on an interval, and checks for any Chapters (.cbz-Archive) not already existing in your specified Download-Location. (If you rename or move files, it will download those again)
 Tranga can (if configured) trigger a scan in Komga or Kavita, however the directory in which the Manga reside has to be available to both Tranga and Komga/Kavita.
 
-The project doesn't manage metadata, and doesn't curate, change or enhance any information that isn't available on the selected Scanlation-Site.  
+The project doesn't manage metadata, and doesn't curate, change or enhance any information that isn't available on the selected Scanlation-Site.
 It will blindly use whatever is scrapes (yes this is a glorified Web-scraper).
 
 
@@ -108,8 +140,8 @@ That is why I wanted to create my own project, in a language I understand, and t
 
 ### Docker
 
-Download [docker-compose.yaml](https://git.bernloehr.eu/glax/Tranga/src/branch/master/docker-compose.yaml) and configure to your needs.  
-Mount `/Manga` to wherever you want your chapters (`.cbz`-Archives) downloaded (where Komga/Kavita can access them).  
+Download [docker-compose.yaml](https://git.bernloehr.eu/glax/Tranga/src/branch/master/docker-compose.yaml) and configure to your needs.
+Mount `/Manga` to wherever you want your chapters (`.cbz`-Archives) downloaded (where Komga/Kavita can access them).
 The `docker-compose` also includes [tranga-website](https://github.com/C9Glax/tranga-website) as frontend. For its configuration refer to the repo README.
 
 For compatibility do not execute the compose as root (which you should not do anyways...) but as user that can

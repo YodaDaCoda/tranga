@@ -23,3 +23,6 @@ cover.png
 /Manga
 /settings
 *.DotSettings.user
+
+# devenv and Nix artifacts
+.devenv/
